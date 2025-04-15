@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>VR Kamar Minimalis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a-scene background="color: #F5F5F5" vr-mode-ui="enabled: true">
+
+    <!-- Pencahayaan -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 4 -2" castShadow="true"></a-entity>
+
+    <!-- Kamera + Cursor -->
+    <a-entity id="player" camera wasd-controls look-controls position="0 1.6 2">
+      <a-cursor></a-cursor>
+    </a-entity>
+
+    <!-- Gagang Pintu -->
+    <a-cylinder position="1.93 1 2.94" rotation="0 90 0" radius="0.03" height="0.15" color="#444444"></a-cylinder>
+
+    <!-- Pintu + Pivot -->
+    <a-entity id="pintuPivot" position="1 0 2.99">
+      <a-box id="pintu" position="0.5 1 0" width="1" height="2" depth="0.1"
+            color="#888" class="clickable" door-toggle></a-box>
+    </a-entity>
+
+    <!-- Suara -->
+    <a-sound id="doorSound" src="assets/audio/sound-door.mp3" autoplay="false"></a-sound>
+
+    <!-- Dinding Depan -->
+    <a-plane position="0 1.5 3" rotation="0 180 0" width="6" height="3" color="#e0e0e0"></a-plane>
+
+    <!-- Dinding Belakang -->
+    <a-plane position="0 1.5 -3" rotation="0 0 0" width="6" height="3" color="#e0e0e0"></a-plane>
+
+    <!-- Dinding Kiri -->
+    <a-plane position="-3 1.5 0" rotation="0 90 0" width="6" height="3" color="#e0e0e0"></a-plane>
+
+    <!-- Dinding Kanan -->
+    <a-plane position="3 1.5 0" rotation="0 -90 0" width="6" height="3" color="#e0e0e0"></a-plane>
+
+    <!-- Langit-langit -->
+    <a-plane position="0 3 0" rotation="90 0 0" width="6" height="6" color="#f0f0f0"></a-plane>
+
+    <!-- Lantai -->
+    <a-entity gltf-model="models/floor.glb" position="0 0 0" scale="4 2 4"></a-entity>
+
+    <!-- Kasur -->
+    <a-entity gltf-model="models/bad.glb" position="-1.8 0 -2.05" scale="1.2 1.2 1.2"></a-entity>
+
+    <!-- Lampu LED di bawah kasur -->
+    <a-entity light="type: point; color: #00ffff; intensity: 1.5; distance: 3" position="-2.2 0.1 -2.7"></a-entity>
+
+    <!-- LED Strip - Semua Dinding -->
+    <a-box position="0 2.95 -2.99" width="5.8" height="0.05" depth="0.05" color="#00ffff"
+      material="emissive: #00ffff; emissiveIntensity: 1"></a-box>
+    <a-box position="0 2.95 2.99" width="5.8" height="0.05" depth="0.05" color="#00ffff"
+      material="emissive: #00ffff; emissiveIntensity: 1"></a-box>
+    <a-box position="-2.95 2.95 0" width="5.8" height="0.05" depth="0.05" rotation="0 90 0" color="#00ffff"
+      material="emissive: #00ffff; emissiveIntensity: 1"></a-box>
+    <a-box position="2.95 2.95 0" width="5.8" height="0.05" depth="0.05" rotation="0 90 0" color="#00ffff"
+      material="emissive: #00ffff; emissiveIntensity: 1"></a-box>
+
+    <!-- Perabot Lain -->
+    <a-entity gltf-model="models/frame_1.glb" position="-2.7 1.2 -2.9" scale="0.4 0.4 0.05"></a-entity>
+    <a-entity gltf-model="models/desk.glb" position="2.4 0.6 -2.1" scale="0.9 0.9 0.9"></a-entity>
+
+    <!-- Kursi dengan animasi klik -->
+    <a-entity id="kursi" gltf-model="models/kursi.glb" position="2.3 0 -1.9" scale="0.7 0.7 0.7" rotation="0 180 0" class="clickable" chair-toggle></a-entity>
+
+    <a-entity gltf-model="models/lemari.glb" position="0.2 0 -2.7" scale="1 1 1" rotation="0 180 0"></a-entity>
+    <a-entity gltf-model="models/tv.glb" position="-1.6 2.1 2.98" rotation="0 180 0" scale="0.85 0.85 0.07"></a-entity>
+    <a-entity gltf-model="models/ac.glb" position="-3 2.5 -1.3" rotation="0 90 0" scale="1.5 1 1"></a-entity>
+    <a-entity gltf-model="models/carpet.glb" position="0.4 0 -1.8" scale="2 0.1 2"></a-entity>
+
+    <!-- Lampu Gantung Berputar -->
+    <a-entity position="0 2.8 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+      <a-entity gltf-model="models/lamp.glb"></a-entity>
+    </a-entity>
+    <a-entity light="type: point; intensity: 1.0; distance: 6" position="0 2.8 0" color="#ffffff"></a-entity>
+
+  </a-scene>
+
+  <!-- Script Klik Manual Pintu -->
+  <script>
+    AFRAME.registerComponent('door-toggle', {
+      init: function () {
+        this.isOpen = false;
+        this.el.addEventListener('click', () => {
+          const pivot = document.querySelector('#pintuPivot');
+          const sound = document.querySelector('#doorSound');
+  
+          pivot.setAttribute('animation', {
+            property: 'rotation',
+            to: this.isOpen ? '0 0 0' : '0 90 0',
+            dur: 800,
+            easing: 'easeOutQuad'
+          });
+  
+          if (sound && sound.components.sound) {
+            sound.components.sound.playSound();
+          }
+  
+          this.isOpen = !this.isOpen;
+        });
+      }
+    });
+
+    // Script untuk animasi kursi saat diklik
+    AFRAME.registerComponent('chair-toggle', {
+      init: function () {
+        this.isBack = false;
+        this.el.addEventListener('click', () => {
+          const newZ = this.isBack ? -1.9 : -2.4; // mundur 0.5 unit
+          this.el.setAttribute('animation__move', {
+            property: 'position',
+            to: `2.3 0 ${newZ}`,
+            dur: 800,
+            easing: 'easeOutQuad'
+          });
+          this.isBack = !this.isBack;
+        });
+      }
+    });
+  </script>
+</body>
+</html>
